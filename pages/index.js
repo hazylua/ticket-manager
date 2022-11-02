@@ -9,6 +9,7 @@ import Field from 'components/Field';
 import Spinner from 'components/Spinner';
 import Table from 'components/Table';
 import TitleHeader from 'components/TitleHeader';
+import { useDebounce } from 'hooks/useDebounce';
 import { isEmpty } from 'lodash';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -72,53 +73,84 @@ export default function TicketTable() {
     dispatch(deleteTickets(ticketsToExclude));
   };
 
+  const [filteredTickets, setFilteredTickets] = useState(null);
+
+  const { handleInputChange, isTyping } = useDebounce();
+
+  useEffect(() => {
+    if (tickets) {
+      setFilteredTickets(tickets);
+    }
+  }, [tickets]);
+
+  const handleFilterText = useCallback(
+    (e) => {
+      const filtered = tickets.filter((ticket) =>
+        ticket.title.includes(e.target.value),
+      );
+      setFilteredTickets(filtered);
+    },
+    [tickets],
+  );
+
   return (
     <Container>
       <TitleHeader title='Tickets'>
         {/* <Spinner className='text-sky-500' /> */}
         <Field
           startIcon={
-            <MagnifyingGlassIcon className='w-5 text-inherit text-neutral-400' />
+            isTyping ? (
+              <Spinner className='w-5 text-sky-500' />
+            ) : (
+              <MagnifyingGlassIcon className='w-5 text-inherit text-neutral-400' />
+            )
           }
-          title='Search'
-          placeholder='Search tickets by title...'
-        />
-        <Link href='/ticket/new'>
-          <Button className='flex items-center gap-2 bg-sky-500 border-sky-600 hover:bg-sky-600'>
-            <PlusIcon className='h-5' />
-            New Ticket
-          </Button>
-        </Link>
-        <Button
-          className='flex items-center gap-2 bg-rose-500 border-rose-600 hover:bg-rose-600 disabled:border-rose-900 disabled:bg-rose-900 disabled:text-neutral-400'
-          disabled={selectedTickets.length === 0}
-          onClick={handleDeleteTickets}
-        >
-          <TrashIcon className='h-5' />
-          Remove Ticket(s)
-        </Button>
-        <Button
-          disabled={isFetching}
-          className='flex items-center gap-2 bg-neutral-400 border-neutral-500 hover:bg-neutral-500 disabled:bg-neutral-900 disabled:text-neutral-400'
-          onClick={() => {
-            refetch();
+          inputProps={{
+            title: 'Search',
+            placeholder: 'Search tickets by title...',
+            onKeyDown: (e) => {
+              handleInputChange(e, () => handleFilterText(e));
+            },
           }}
-        >
-          {isFetching ? (
-            <Spinner className='w-5 h-5' />
-          ) : (
-            <ArrowPathIcon className='w-5 h-5' />
-          )}
-          Recarregar Dados
-        </Button>
+        />
+        <div className='flex flex-row justify-center gap-4'>
+          <Link href='/ticket/new'>
+            <Button className='flex items-center gap-2 bg-sky-500 border-sky-600 hover:bg-sky-600'>
+              <PlusIcon className='h-5' />
+              New Ticket
+            </Button>
+          </Link>
+          <Button
+            className='flex items-center gap-2 bg-rose-500 border-rose-600 hover:bg-rose-600 disabled:border-rose-900 disabled:bg-rose-900 disabled:text-neutral-400'
+            disabled={selectedTickets.length === 0}
+            onClick={handleDeleteTickets}
+          >
+            <TrashIcon className='h-5' />
+            Remove Ticket(s)
+          </Button>
+          <Button
+            disabled={isFetching}
+            className='flex items-center gap-2 bg-neutral-400 border-neutral-500 hover:bg-neutral-500 disabled:bg-neutral-900 disabled:text-neutral-400 flex-nowrap'
+            onClick={() => {
+              dispatch(setTickets(null));
+              refetch();
+            }}
+          >
+            {isFetching ? (
+              <Spinner className='w-5 h-5' />
+            ) : (
+              <ArrowPathIcon className='w-5 h-5' />
+            )}
+            Recarregar Dados
+          </Button>
+        </div>
       </TitleHeader>
-
       <div className='flex flex-grow w-full'>
         <Table
           isLoading={isLoading}
           isFetching={isFetching}
           handleSelectedRows={handleSelectedItems}
-          tableData={tickets ?? emptyArr}
+          tableData={filteredTickets ?? emptyArr}
           columnDefs={ticketsColumnDefs}
           tablePageSizes={[5, 10, 20]}
         />

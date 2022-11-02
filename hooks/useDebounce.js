@@ -19,7 +19,10 @@ export function useDebounce(timeout = 1000) {
       debounceCallback.flush();
     }
 
-    if (!isTyping && isInputAlphanumeric(event.keyCode)) {
+    if (
+      (!isTyping && isInputAlphanumeric(event.keyCode)) ||
+      event.keyCode === 8
+    ) {
       setIsTyping(true);
     }
     debounceCallback(callback);

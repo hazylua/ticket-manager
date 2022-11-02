@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { createSlice } from '@reduxjs/toolkit';
 import { cloneDeep, difference, differenceWith } from 'lodash';
 
-export const ticketsInitialState = [];
+export const ticketsInitialState = null;
 
 export const ticketsSlice = createSlice({
   name: 'tickets',

@@ -3,15 +3,15 @@ import React from 'react';
 
 import TextInput from './TextInput';
 
-function Field({ startIcon, children, ...props }) {
+function Field({ startIcon, children, className, inputProps, ...props }) {
   return (
-    <label className='relative block'>
+    <label className={clsx('relative block', className)} {...props}>
       {startIcon && (
         <span className='absolute inset-y-0 left-0 flex items-center pl-2'>
           {startIcon}
         </span>
       )}
-      <TextInput {...props} className={clsx(startIcon && 'pl-9')} />
+      <TextInput {...inputProps} className={clsx(startIcon && 'pl-9')} />
     </label>
   );
 }

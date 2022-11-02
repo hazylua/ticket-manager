@@ -8,22 +8,21 @@ import { useFindTicketsQuery } from 'store/query';
 import { setTickets } from '../store/tickets';
 
 export default function Layout({ children }) {
-  const [initialized, setInitialized] = useState(false);
-
   const tickets = useSelector((state) => state.tickets);
 
+  const shouldInitializeTickets = tickets === null;
+
   const { data: ticketsData } = useFindTicketsQuery('', {
-    skip: !isEmpty(tickets) && !initialized,
+    skip: !shouldInitializeTickets,
   });
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (ticketsData && initialized === false) {
+    if (ticketsData && shouldInitializeTickets) {
       dispatch(setTickets(ticketsData));
-      setInitialized(true);
     }
-  }, [dispatch, ticketsData, initialized]);
+  }, [dispatch, ticketsData, shouldInitializeTickets]);
 
   return (
     <>
