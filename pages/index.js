@@ -10,7 +10,7 @@ import Spinner from 'components/Spinner';
 import Table from 'components/Table';
 import TitleHeader from 'components/TitleHeader';
 import { useDebounce } from 'hooks/useDebounce';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNil } from 'lodash';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -107,6 +107,7 @@ export default function TicketTable() {
           }
           inputProps={{
             title: 'Search',
+            disabled: isNil(filteredTickets),
             placeholder: 'Search tickets by title...',
             onKeyDown: (e) => {
               handleInputChange(e, () => handleFilterText(e));
